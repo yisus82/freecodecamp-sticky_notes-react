@@ -1,5 +1,9 @@
 import NotesPage from './pages/NotesPage';
 
-const App = () => <NotesPage />;
+const App = () => (
+  <div id='app'>
+    <NotesPage />
+  </div>
+);
 
 export default App;
