@@ -1,3 +1,4 @@
+import Trash from '../icons/Trash';
 import { Note } from '../types/app';
 
 type NoteCardProps = {
@@ -20,7 +21,9 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
         style={{
           backgroundColor: colors.colorHeader,
         }}
-      ></div>
+      >
+        <Trash />
+      </div>
       <div className='card-body'>
         <textarea
           defaultValue={body}
