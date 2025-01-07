@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Trash from '../icons/Trash';
 import { Note, NoteColor, NotePosition } from '../types/app';
 
@@ -9,8 +9,13 @@ type NoteCardProps = {
 const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
   const body = JSON.parse(note.body);
   const colors: NoteColor = JSON.parse(note.colors);
-  const position: NotePosition = JSON.parse(note.position);
+  const [position, setPosition] = useState<NotePosition>(JSON.parse(note.position));
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const mouseStartPos = {
+    x: 0,
+    y: 0,
+  };
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const autoGrow = (textArea: typeof textAreaRef) => {
     if (!textArea.current) {
@@ -24,9 +29,41 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
     autoGrow(textAreaRef);
   }, []);
 
+  const mouseMove = (event: MouseEvent) => {
+    if (!cardRef.current) {
+      return;
+    }
+
+    const mouseMoveDir = {
+      x: mouseStartPos.x - event.clientX,
+      y: mouseStartPos.y - event.clientY,
+    };
+
+    mouseStartPos.x = event.clientX;
+    mouseStartPos.y = event.clientY;
+
+    setPosition({
+      x: cardRef.current.offsetLeft - mouseMoveDir.x,
+      y: cardRef.current.offsetTop - mouseMoveDir.y,
+    });
+  };
+
+  const mouseUp = () => {
+    document.removeEventListener('mousemove', mouseMove);
+    document.removeEventListener('mouseup', mouseUp);
+  };
+
+  const mouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    mouseStartPos.x = event.clientX;
+    mouseStartPos.y = event.clientY;
+    document.addEventListener('mousemove', mouseMove);
+    document.addEventListener('mouseup', mouseUp);
+  };
+
   return (
     <div
       className='card'
+      ref={cardRef}
       style={{
         backgroundColor: colors.colorBody,
         left: `${position.x}px`,
@@ -35,6 +72,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
     >
       <div
         className='card-header'
+        onMouseDown={mouseDown}
         style={{
           backgroundColor: colors.colorHeader,
         }}
