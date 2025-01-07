@@ -42,9 +42,12 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
     mouseStartPos.x = event.clientX;
     mouseStartPos.y = event.clientY;
 
+    const offsetLeft = cardRef.current.offsetLeft - mouseMoveDir.x;
+    const offsetTop = cardRef.current.offsetTop - mouseMoveDir.y;
+
     setPosition({
-      x: cardRef.current.offsetLeft - mouseMoveDir.x,
-      y: cardRef.current.offsetTop - mouseMoveDir.y,
+      x: offsetLeft < 0 ? 0 : offsetLeft,
+      y: offsetTop < 0 ? 0 : offsetTop,
     });
   };
 
