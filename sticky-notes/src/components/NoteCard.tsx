@@ -29,6 +29,21 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
     autoGrow(textAreaRef);
   }, []);
 
+  const bringToTop = () => {
+    if (!cardRef.current) {
+      return;
+    }
+
+    const cards = document.querySelectorAll('.card') as NodeListOf<HTMLDivElement>;
+    cards.forEach(card => {
+      if (card !== cardRef.current) {
+        card.style.zIndex = '0';
+      } else {
+        card.style.zIndex = '1';
+      }
+    });
+  };
+
   const mouseMove = (event: MouseEvent) => {
     if (!cardRef.current) {
       return;
@@ -57,6 +72,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
   };
 
   const mouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    bringToTop();
     mouseStartPos.x = event.clientX;
     mouseStartPos.y = event.clientY;
     document.addEventListener('mousemove', mouseMove);
@@ -87,6 +103,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
           ref={textAreaRef}
           defaultValue={body}
           onInput={() => autoGrow(textAreaRef)}
+          onFocus={bringToTop}
           style={{
             color: colors.colorText,
           }}
