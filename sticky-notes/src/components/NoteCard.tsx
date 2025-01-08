@@ -4,18 +4,20 @@ import { Note, NoteColor, NotePosition } from '../types/app';
 
 type NoteCardProps = {
   note: Note;
+  isActive: boolean;
+  setActive: () => void;
 };
 
-const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
+const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
   const body = JSON.parse(note.body);
   const colors: NoteColor = JSON.parse(note.colors);
   const [position, setPosition] = useState<NotePosition>(JSON.parse(note.position));
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const mouseStartPos = {
     x: 0,
     y: 0,
   };
-  const cardRef = useRef<HTMLDivElement>(null);
 
   const autoGrow = (textArea: typeof textAreaRef) => {
     if (!textArea.current) {
@@ -28,21 +30,6 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
   useEffect(() => {
     autoGrow(textAreaRef);
   }, []);
-
-  const bringToTop = () => {
-    if (!cardRef.current) {
-      return;
-    }
-
-    const cards = document.querySelectorAll('.card') as NodeListOf<HTMLDivElement>;
-    cards.forEach(card => {
-      if (card !== cardRef.current) {
-        card.style.zIndex = '0';
-      } else {
-        card.style.zIndex = '1';
-      }
-    });
-  };
 
   const mouseMove = (event: MouseEvent) => {
     if (!cardRef.current) {
@@ -72,7 +59,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
   };
 
   const mouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    bringToTop();
+    setActive();
     mouseStartPos.x = event.clientX;
     mouseStartPos.y = event.clientY;
     document.addEventListener('mousemove', mouseMove);
@@ -87,6 +74,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
         backgroundColor: colors.colorBody,
         left: `${position.x}px`,
         top: `${position.y}px`,
+        zIndex: isActive ? 1 : 0,
       }}
     >
       <div
@@ -103,7 +91,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
           ref={textAreaRef}
           defaultValue={body}
           onInput={() => autoGrow(textAreaRef)}
-          onFocus={bringToTop}
+          onFocus={() => setActive()}
           style={{
             color: colors.colorText,
           }}
