@@ -1,9 +1,21 @@
-import { useState } from 'react';
-import { fakeData as notes } from '../assets/fakeData.js';
+import { useEffect, useState } from 'react';
+import { db } from '../appwrite/databases';
 import NoteCard from '../components/NoteCard';
+import { DBNote } from '../types/app';
 
 const NotesPage = () => {
-  const [activeNoteCardId, setActiveNoteCardId] = useState<number | null>(null);
+  const [activeNoteCardId, setActiveNoteCardId] = useState('');
+  const [notes, setNotes] = useState<DBNote[]>([]);
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  const init = async () => {
+    const response = await db.notes.list();
+    const dbNotes = response.documents as DBNote[];
+    setNotes(dbNotes);
+  };
 
   return (
     <div>

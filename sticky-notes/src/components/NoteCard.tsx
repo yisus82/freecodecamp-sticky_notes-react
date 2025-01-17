@@ -8,8 +8,17 @@ type NoteCardProps = {
   setActive: () => void;
 };
 
+const bodyParser = (value: string) => {
+  try {
+    JSON.parse(value);
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+};
+
 const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
-  const body = JSON.parse(note.body);
+  const body = bodyParser(note.body);
   const colors: NoteColor = JSON.parse(note.colors);
   const [position, setPosition] = useState<NotePosition>(JSON.parse(note.position));
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
