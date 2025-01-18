@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { db } from '../appwrite/databases';
+import Spinner from '../icons/Spinner';
 import Trash from '../icons/Trash';
 import { Note, NoteAttribute, NoteColor, NotePosition } from '../types/app';
 
@@ -50,7 +51,6 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
     } catch (error) {
       console.error(error);
     }
-    setSaving(false);
   };
 
   const mouseMove = (event: MouseEvent) => {
@@ -91,20 +91,18 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
   };
 
   const handleKeyUp = async () => {
-    // Initiate saving state
     setSaving(true);
 
-    // If we have a timer id, clear it so we can add another two seconds
     if (keyUpTimer.current) {
       clearTimeout(keyUpTimer.current);
     }
 
-    // Set timer to trigger save data in 2 seconds
-    keyUpTimer.current = setTimeout(() => {
+    keyUpTimer.current = setTimeout(async () => {
       if (!textAreaRef.current) {
         return;
       }
-      saveData('body', textAreaRef.current.value);
+      await saveData('body', textAreaRef.current.value);
+      setSaving(false);
     }, 2000);
   };
 
@@ -127,6 +125,12 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
         }}
       >
         <Trash />
+        {saving && (
+          <div className='card-saving'>
+            <Spinner color={colors.colorText} />
+            <span style={{ color: colors.colorText }}>Saving note content, please wait...</span>
+          </div>
+        )}
       </div>
       <div className='card-body'>
         <textarea
