@@ -22,6 +22,8 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
   const body = bodyParser(note.body);
   const colors: NoteColor = JSON.parse(note.colors);
   const [position, setPosition] = useState<NotePosition>(JSON.parse(note.position));
+  const [saving, setSaving] = useState(false);
+  const keyUpTimer = useRef<null | number>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const mouseStartPos = {
@@ -48,6 +50,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
     } catch (error) {
       console.error(error);
     }
+    setSaving(false);
   };
 
   const mouseMove = (event: MouseEvent) => {
@@ -87,6 +90,24 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
     document.addEventListener('mouseup', mouseUp);
   };
 
+  const handleKeyUp = async () => {
+    // Initiate saving state
+    setSaving(true);
+
+    // If we have a timer id, clear it so we can add another two seconds
+    if (keyUpTimer.current) {
+      clearTimeout(keyUpTimer.current);
+    }
+
+    // Set timer to trigger save data in 2 seconds
+    keyUpTimer.current = setTimeout(() => {
+      if (!textAreaRef.current) {
+        return;
+      }
+      saveData('body', textAreaRef.current.value);
+    }, 2000);
+  };
+
   return (
     <div
       className='card'
@@ -111,6 +132,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
         <textarea
           ref={textAreaRef}
           defaultValue={body}
+          onKeyUp={handleKeyUp}
           onInput={() => autoGrow(textAreaRef)}
           onFocus={() => setActive()}
           style={{
