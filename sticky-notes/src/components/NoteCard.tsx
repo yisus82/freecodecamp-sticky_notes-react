@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { db } from '../appwrite/databases';
 import Spinner from '../icons/Spinner';
-import Trash from '../icons/Trash';
 import { Note, NoteAttribute, NoteColor, NotePosition } from '../types/app';
+import DeleteButton from './DeleteButton';
 
 type NoteCardProps = {
   note: Note;
   isActive: boolean;
   setActive: () => void;
+  deleteNoteCard: () => void;
 };
 
 const bodyParser = (value: string) => {
@@ -19,7 +20,7 @@ const bodyParser = (value: string) => {
   }
 };
 
-const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
+const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive, deleteNoteCard }) => {
   const body = bodyParser(note.body);
   const colors: NoteColor = JSON.parse(note.colors);
   const [position, setPosition] = useState<NotePosition>(JSON.parse(note.position));
@@ -27,6 +28,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
   const keyUpTimer = useRef<null | number>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const cardHeaderRef = useRef<HTMLDivElement>(null);
   const mouseStartPos = {
     x: 0,
     y: 0,
@@ -53,9 +55,9 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
     }
   };
 
-  const mouseMove = (event: MouseEvent) => {
+  const calculateNewPosition = (event: MouseEvent) => {
     if (!cardRef.current) {
-      return;
+      return position;
     }
 
     const mouseMoveDir = {
@@ -69,25 +71,34 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
     const offsetLeft = cardRef.current.offsetLeft - mouseMoveDir.x;
     const offsetTop = cardRef.current.offsetTop - mouseMoveDir.y;
 
-    const newPosition = {
+    return {
       x: offsetLeft < 0 ? 0 : offsetLeft,
       y: offsetTop < 0 ? 0 : offsetTop,
     };
-    setPosition(newPosition);
-    saveData('position', newPosition);
   };
 
-  const mouseUp = () => {
+  const mouseMove = (event: MouseEvent) => {
+    const newPosition = calculateNewPosition(event);
+
+    setPosition(newPosition);
+  };
+
+  const mouseUp = (event: MouseEvent) => {
+    const newPosition = calculateNewPosition(event);
+    setPosition(newPosition);
+    saveData('position', newPosition);
     document.removeEventListener('mousemove', mouseMove);
     document.removeEventListener('mouseup', mouseUp);
   };
 
   const mouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    setActive();
-    mouseStartPos.x = event.clientX;
-    mouseStartPos.y = event.clientY;
-    document.addEventListener('mousemove', mouseMove);
-    document.addEventListener('mouseup', mouseUp);
+    if (event.target === cardHeaderRef.current) {
+      setActive();
+      mouseStartPos.x = event.clientX;
+      mouseStartPos.y = event.clientY;
+      document.addEventListener('mousemove', mouseMove);
+      document.addEventListener('mouseup', mouseUp);
+    }
   };
 
   const handleKeyUp = async () => {
@@ -119,12 +130,13 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
     >
       <div
         className='card-header'
+        ref={cardHeaderRef}
         onMouseDown={mouseDown}
         style={{
           backgroundColor: colors.colorHeader,
         }}
       >
-        <Trash />
+        <DeleteButton onClick={deleteNoteCard} />
         {saving && (
           <div className='card-saving'>
             <Spinner color={colors.colorText} />

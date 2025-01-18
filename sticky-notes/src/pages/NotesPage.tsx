@@ -7,14 +7,19 @@ const NotesPage = () => {
   const [activeNoteCardId, setActiveNoteCardId] = useState('');
   const [notes, setNotes] = useState<DBNote[]>([]);
 
-  useEffect(() => {
-    init();
-  }, []);
-
   const init = async () => {
     const response = await db.notes.list();
     const dbNotes = response.documents as DBNote[];
     setNotes(dbNotes);
+  };
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  const deleteNoteCard = async (id: string) => {
+    await db.notes.delete(id);
+    setNotes(prevState => prevState.filter(note => note.$id !== id));
   };
 
   return (
@@ -25,6 +30,7 @@ const NotesPage = () => {
           key={note.$id}
           isActive={note.$id === activeNoteCardId}
           setActive={() => setActiveNoteCardId(note.$id)}
+          deleteNoteCard={() => deleteNoteCard(note.$id)}
         />
       ))}
     </div>
