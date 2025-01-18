@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { db } from '../appwrite/databases';
 import Trash from '../icons/Trash';
-import { Note, NoteColor, NotePosition } from '../types/app';
+import { Note, NoteAttribute, NoteColor, NotePosition } from '../types/app';
 
 type NoteCardProps = {
   note: Note;
@@ -40,6 +41,15 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
     autoGrow(textAreaRef);
   }, []);
 
+  const saveData = async (key: NoteAttribute, value: NotePosition | string) => {
+    const payload = { [key]: JSON.stringify(value) };
+    try {
+      await db.notes.update(note.$id, payload);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const mouseMove = (event: MouseEvent) => {
     if (!cardRef.current) {
       return;
@@ -56,10 +66,12 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, isActive, setActive }) => {
     const offsetLeft = cardRef.current.offsetLeft - mouseMoveDir.x;
     const offsetTop = cardRef.current.offsetTop - mouseMoveDir.y;
 
-    setPosition({
+    const newPosition = {
       x: offsetLeft < 0 ? 0 : offsetLeft,
       y: offsetTop < 0 ? 0 : offsetTop,
-    });
+    };
+    setPosition(newPosition);
+    saveData('position', newPosition);
   };
 
   const mouseUp = () => {

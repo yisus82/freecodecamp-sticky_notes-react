@@ -7,6 +7,8 @@ export interface Note {
   position: string;
 }
 
+export type NoteAttribute = 'body' | 'colors' | 'position';
+
 export interface NoteColor {
   id: string;
   colorHeader: string;
@@ -38,9 +40,9 @@ export interface DBCollection {
 }
 
 export interface NotePayload {
-  body: string;
-  colors: string;
-  position: string;
+  body?: string;
+  colors?: string;
+  position?: string;
 }
 
 export interface CollectionMethods {
