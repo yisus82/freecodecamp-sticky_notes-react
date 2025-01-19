@@ -4,7 +4,7 @@ import ControlPanel from '../components/ControlPanel';
 import NoteCard from '../components/NoteCard';
 import { defaultColor } from '../constants/colors';
 import Spinner from '../icons/Spinner';
-import { DBNote, NotePosition } from '../types/app';
+import { DBNote, NoteColor, NotePosition } from '../types/app';
 
 const NotesPage = () => {
   const [activeNoteCardId, setActiveNoteCardId] = useState('');
@@ -42,6 +42,18 @@ const NotesPage = () => {
     setNewNoteCardPosition({ x: newNoteCardPosition.x + 20, y: newNoteCardPosition.y + 20 });
   };
 
+  const changeNoteCardColor = async (color: NoteColor) => {
+    await db.notes.update(activeNoteCardId, { colors: JSON.stringify(color) });
+    setNotes(prevState =>
+      prevState.map(note => {
+        if (note.$id === activeNoteCardId) {
+          return { ...note, colors: JSON.stringify(color) };
+        }
+        return note;
+      })
+    );
+  };
+
   if (isLoading) {
     return (
       <div className='loading'>
@@ -62,7 +74,7 @@ const NotesPage = () => {
           deleteNoteCard={() => deleteNoteCard(note.$id)}
         />
       ))}
-      <ControlPanel addNoteCard={addNoteCard} />
+      <ControlPanel addNoteCard={addNoteCard} changeNoteCardColor={changeNoteCardColor} />
     </div>
   );
 };
