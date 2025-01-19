@@ -150,3 +150,46 @@ body {
   height: 45px;
   width: 45px;
 }
+
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  position: fixed;
+  top: calc(50% - 75px);
+  left: calc(50% - 200px);
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #35363e;
+  border-radius: 10px;
+  height: 150px;
+  width: 400px;
+  padding: 10px;
+}
+
+.modal-content h2 {
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid #6b6b6b;
+}
+
+.modal-content p {
+  text-align: center;
+}
+
+.modal-content button {
+  background-color: #6b6b6b;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100px;
+  margin: 0 auto;
+}

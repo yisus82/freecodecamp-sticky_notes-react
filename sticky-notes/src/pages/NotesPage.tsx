@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { db } from '../appwrite/databases';
 import ControlPanel from '../components/ControlPanel';
+import ErrorModal from '../components/ErrorModal';
 import NoteCard from '../components/NoteCard';
 import { defaultColor } from '../constants/colors';
 import Spinner from '../icons/Spinner';
@@ -11,6 +12,7 @@ const NotesPage = () => {
   const [notes, setNotes] = useState<DBNote[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [newNoteCardPosition, setNewNoteCardPosition] = useState<NotePosition>({ x: 0, y: 0 });
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   const init = async () => {
     setIsLoading(true);
@@ -43,6 +45,11 @@ const NotesPage = () => {
   };
 
   const changeNoteCardColor = async (color: NoteColor) => {
+    if (activeNoteCardId === '') {
+      setShowErrorModal(true);
+      return;
+    }
+
     await db.notes.update(activeNoteCardId, { colors: JSON.stringify(color) });
     setNotes(prevState =>
       prevState.map(note => {
@@ -75,6 +82,12 @@ const NotesPage = () => {
         />
       ))}
       <ControlPanel addNoteCard={addNoteCard} changeNoteCardColor={changeNoteCardColor} />
+      {showErrorModal && (
+        <ErrorModal
+          message='Please select a note card first to change its color.'
+          onClose={() => setShowErrorModal(false)}
+        />
+      )}
     </div>
   );
 };
